@@ -157,10 +157,10 @@ typedef struct {
 #endif
 #define delay_ms(ms) vTaskDelay((ms > portTICK_PERIOD_MS ? ms / portTICK_PERIOD_MS : 1))
 
-// Configuration 800x640 RAW8
+// Configuration 800x640 RAW8 OPTIMISÉE pour 50fps
 static const ov5647_reginfo_t ov5647_input_24M_MIPI_2lane_raw8_800x640_50fps[] = {
-    {0x3034, OV5647_8BIT_MODE},  // set RAW format
-    {0x3035, 0x41},              // system clk div
+    {0x3034, OV5647_8BIT_MODE},
+    {0x3035, 0x41},
     {0x3036, ((OV5647_IDI_CLOCK_RATE_800x640_50FPS * 8 * 4) / 25000000)},
     {0x303c, 0x11},
     {0x3106, 0xf5},
@@ -171,10 +171,8 @@ static const ov5647_reginfo_t ov5647_input_24M_MIPI_2lane_raw8_800x640_50fps[] =
     {0x3612, 0x59},
     {0x3618, 0x00},
     {0x5000, 0xff},
-
-    {0x583e, 0xf0},  // LSC max gain
-    {0x583f, 0x20},  // LSC min gain
-
+    {0x583e, 0xf0},
+    {0x583f, 0x20},
     {0x5002, 0x41},
     {0x5003, 0x08},
     {0x5a00, 0x08},
@@ -191,47 +189,29 @@ static const ov5647_reginfo_t ov5647_input_24M_MIPI_2lane_raw8_800x640_50fps[] =
     {0x3c01, 0x80},
     {0x3c00, 0x40},
     {0x3b07, 0x0c},
-    // HTS line exposure time in # of pixels
     {0x380c, (1896 >> 8) & 0x1F},
     {0x380d, 1896 & 0xFF},
-    // VTS frame exposure time in # lines
     {0x380e, (984 >> 8) & 0xFF},
     {0x380f, 984 & 0xFF},
     {0x3814, 0x31},
     {0x3815, 0x31},
     {0x3708, 0x64},
     {0x3709, 0x52},
-    //[3:0]=0 X address start high byte
     {0x3800, (500 >> 8) & 0x0F},
-    //[7:0]=0 X address start low byte
     {0x3801, 500 & 0xFF},
-    //[2:0]=0 Y address start high byte
     {0x3802, (0 >> 8) & 0x07},
-    //[7:0]=0 Y address start low byte
     {0x3803, 0 & 0xFF},
-    //[3:0] X address end high byte
     {0x3804, ((2624 - 1) >> 8) & 0x0F},
-    //[7:0] X address end low byte
     {0x3805, (2624 - 1) & 0xFF},
-    //[2:0] Y address end high byte
     {0x3806, ((1954 - 1) >> 8) & 0x07},
-    //[7:0] Y address end low byte
     {0x3807, (1954 - 1) & 0xFF},
-    //[3:0] Output horizontal width high byte
     {0x3808, (800 >> 8) & 0x0F},
-    //[7:0] Output horizontal width low byte
     {0x3809, 800 & 0xFF},
-    //[2:0] Output vertical height high byte
     {0x380a, (640 >> 8) & 0x7F},
-    //[7:0] Output vertical height low byte
     {0x380b, 640 & 0xFF},
-    //[3:0]=0 timing hoffset high byte
     {0x3810, (8 >> 8) & 0x0F},
-    //[7:0]=0 timing hoffset low byte
     {0x3811, 8 & 0xFF},
-    //[2:0]=0 timing voffset high byte
     {0x3812, (0 >> 8) & 0x07},
-    //[7:0]=0 timing voffset low byte
     {0x3813, 0 & 0xFF},
     {0x3630, 0x2e},
     {0x3632, 0xe2},
@@ -272,17 +252,12 @@ static const ov5647_reginfo_t ov5647_input_24M_MIPI_2lane_raw8_800x640_50fps[] =
     {OV5647_REG_END, 0x00},
 };
 
-// Configuration ___x___ RAW8 
-// add configurations in ov5647_settings.h
-
-
 } // extern "C"
 
 // ============================================================================
 // IMPLÉMENTATIONS SCCB ET SENSOR
 // ============================================================================
 
-// Structure SCCB IO interne (utilise ESPHome I2C au lieu d'ESP-IDF)
 struct esp_sccb_io_t {
     esphome::i2c::I2CDevice *i2c_device;
     uint32_t addr_bits_width;
@@ -302,7 +277,6 @@ esp_err_t esp_sccb_transmit_receive_reg_a16v8(esp_sccb_io_handle_t handle,
                                               uint16_t reg_addr, 
                                               uint8_t *reg_val);
 
-// Implémentation de sccb_new_i2c_io pour ESPHome
 esp_err_t sccb_new_i2c_io_esphome(esphome::i2c::I2CDevice *i2c_device,
                                    const sccb_i2c_config_t *config,
                                    esp_sccb_io_handle_t *io_handle) {
@@ -323,7 +297,6 @@ esp_err_t sccb_new_i2c_io_esphome(esphome::i2c::I2CDevice *i2c_device,
     return ESP_OK;
 }
 
-// Implémentation de esp_cam_sensor_get_format
 esp_err_t esp_cam_sensor_get_format(esp_cam_sensor_device_t *dev, 
                                     esp_cam_sensor_format_t *format) {
     if (!dev || !format || !dev->ops) {
@@ -335,7 +308,6 @@ esp_err_t esp_cam_sensor_get_format(esp_cam_sensor_device_t *dev,
     return dev->ops->get_format(dev, format);
 }
 
-// Implémentation de esp_cam_sensor_ioctl
 esp_err_t esp_cam_sensor_ioctl(esp_cam_sensor_device_t *dev, 
                                uint32_t cmd, 
                                void *arg) {
@@ -348,7 +320,6 @@ esp_err_t esp_cam_sensor_ioctl(esp_cam_sensor_device_t *dev,
     return dev->ops->priv_ioctl(dev, cmd, arg);
 }
 
-// Implémentations des fonctions SCCB pour communication I2C
 esp_err_t esp_sccb_transmit_reg_a16v8(esp_sccb_io_handle_t handle, 
                                        uint16_t reg_addr, 
                                        uint8_t reg_val) {
@@ -378,7 +349,6 @@ esp_err_t esp_sccb_transmit_receive_reg_a16v8(esp_sccb_io_handle_t handle,
         (uint8_t)(reg_addr & 0xFF)
     };
     
-//    esphome::i2c::ErrorCode err = handle->i2c_device->write(addr_buf, 2, false);
     esphome::i2c::ErrorCode err = handle->i2c_device->write(addr_buf, 2);
     if (err != esphome::i2c::ERROR_OK) {
         return ESP_FAIL;
@@ -388,7 +358,6 @@ esp_err_t esp_sccb_transmit_receive_reg_a16v8(esp_sccb_io_handle_t handle,
     return (err == esphome::i2c::ERROR_OK) ? ESP_OK : ESP_FAIL;
 }
 
-// Symboles faibles pour éviter les erreurs de linking
 __attribute__((weak)) esp_cam_sensor_detect_fn_t __esp_cam_sensor_detect_fn_array_start = {};
 __attribute__((weak)) esp_cam_sensor_detect_fn_t __esp_cam_sensor_detect_fn_array_end = {};
 
@@ -396,7 +365,6 @@ extern "C" {
 
 static const char *OV5647_TAG = "ov5647";
 
-// Fonctions SCCB de lecture/écriture
 static esp_err_t ov5647_write(esp_sccb_io_handle_t handle, uint16_t reg, uint8_t data) {
     return esp_sccb_transmit_reg_a16v8(handle, reg, data);
 }
@@ -419,7 +387,6 @@ static esp_err_t ov5647_write_array(esp_sccb_io_handle_t handle, ov5647_reginfo_
     return ret;
 }
 
-// Fonction pour définir des bits dans un registre
 static esp_err_t ov5647_set_reg_bits(esp_sccb_io_handle_t handle, 
                                        uint16_t reg, 
                                        uint8_t offset, 
@@ -439,18 +406,15 @@ static esp_err_t ov5647_set_reg_bits(esp_sccb_io_handle_t handle,
     return ret;
 }
 
-// Fonction pour activer le mirror (flip horizontal)
+// CORRIGÉ : Registres OV5647 corrects pour flip/mirror
 static esp_err_t ov5647_set_mirror(esp_cam_sensor_device_t *dev, int enable) {
-    // Registre 0x3221 : bits [2:1] → contrôle du miroir horizontal
-    // 0x00 = normal, 0x01 = miroir horizontal activé
-    return ov5647_set_reg_bits(dev->sccb_handle, 0x3221, 1, 2, enable ? 0x01 : 0x00);
+    // OV5647 : 0x3821 bit 1 pour miroir horizontal
+    return ov5647_set_reg_bits(dev->sccb_handle, 0x3821, 1, 1, enable ? 0x01 : 0x00);
 }
 
-// Fonction pour activer le vflip (flip vertical)
 static esp_err_t ov5647_set_vflip(esp_cam_sensor_device_t *dev, int enable) {
-    // Registre 0x3221 : bits [6:5] → contrôle du flip vertical
-    // 0x00 = normal, 0x01 = flip vertical activé
-    return ov5647_set_reg_bits(dev->sccb_handle, 0x3221, 5, 2, enable ? 0x01 : 0x00);
+    // OV5647 : 0x3820 bit 1 pour flip vertical
+    return ov5647_set_reg_bits(dev->sccb_handle, 0x3820, 1, 1, enable ? 0x01 : 0x00);
 }
 
 static esp_err_t ov5647_get_sensor_id(esp_cam_sensor_device_t *dev, esp_cam_sensor_id_t *id) {
@@ -465,6 +429,30 @@ static esp_err_t ov5647_get_sensor_id(esp_cam_sensor_device_t *dev, esp_cam_sens
     return ESP_OK;
 }
 
+// AJOUT : Séquence d'initialisation de base
+static esp_err_t ov5647_init_sensor(esp_cam_sensor_device_t *dev) {
+    esp_err_t ret;
+    
+    // Software reset
+    ret = ov5647_write(dev->sccb_handle, 0x0103, 0x01);
+    if (ret != ESP_OK) return ret;
+    delay_ms(10);
+    
+    // Sortir du mode sleep
+    ret = ov5647_write(dev->sccb_handle, 0x0100, 0x00);
+    if (ret != ESP_OK) return ret;
+    
+    // Configuration de base
+    ret = ov5647_write(dev->sccb_handle, 0x3035, 0x41);
+    if (ret != ESP_OK) return ret;
+    
+    ret = ov5647_write(dev->sccb_handle, 0x303c, 0x11);
+    if (ret != ESP_OK) return ret;
+    
+    ESP_LOGI(OV5647_TAG, "✓ Init de base OK");
+    return ESP_OK;
+}
+
 static esp_err_t ov5647_set_stream(esp_cam_sensor_device_t *dev, int enable) {
     esp_err_t ret = ov5647_write(dev->sccb_handle, OV5647_REG_SLEEP_MODE, enable ? 0x01 : 0x00);
     dev->stream_status = enable;
@@ -475,25 +463,23 @@ static esp_err_t ov5647_set_stream(esp_cam_sensor_device_t *dev, int enable) {
 static esp_err_t ov5647_set_format(esp_cam_sensor_device_t *dev, const void *format) {
     const ov5647_reginfo_t *reg_list = ov5647_input_24M_MIPI_2lane_raw8_800x640_50fps;
 
-    ESP_LOGI(OV5647_TAG, "Configuration forcée : SVGA 800x640@50fps");
+    ESP_LOGI(OV5647_TAG, "Configuration : SVGA 800x640@50fps");
 
     if (reg_list == NULL) {
-        ESP_LOGE(OV5647_TAG, "Liste de registres invalide pour SVGA");
+        ESP_LOGE(OV5647_TAG, "Liste de registres invalide");
         return ESP_FAIL;
     }
 
-    // Appliquer la configuration
     esp_err_t ret = ov5647_write_array(dev->sccb_handle, (ov5647_reginfo_t*)reg_list);
     if (ret != ESP_OK) {
-        ESP_LOGE(OV5647_TAG, "Échec de configuration du format SVGA : %d", ret);
+        ESP_LOGE(OV5647_TAG, "Échec config format : %d", ret);
         return ret;
     }
 
-    ESP_LOGI(OV5647_TAG, "✓ Format SVGA configuré avec succès");
+    ESP_LOGI(OV5647_TAG, "✓ Format SVGA configuré");
     return ESP_OK;
 }
 
-// CORRECTION: Support flip/mirror via IOCTL
 static esp_err_t ov5647_priv_ioctl(esp_cam_sensor_device_t *dev, uint32_t cmd, void *arg) {
     esp_err_t ret = ESP_OK;
     
@@ -552,7 +538,6 @@ esp_cam_sensor_device_t *ov5647_detect(esp_cam_sensor_config_t *config) {
     dev->sensor_port = config->sensor_port;
     dev->ops = &ov5647_ops;
     
-    // Vérifier l'ID du capteur
     if (ov5647_get_sensor_id(dev, &dev->id) != ESP_OK) {
         ESP_LOGE(OV5647_TAG, "Get sensor ID failed");
         free(dev);
@@ -587,7 +572,6 @@ void Tab5Camera::setup() {
   ESP_LOGI(TAG, "🎥 Initialisation Tab5 Camera");
   
 #ifdef USE_ESP32_VARIANT_ESP32P4
-  // 1. Init pins
   if (this->reset_pin_ != nullptr) {
     this->reset_pin_->setup();
     this->reset_pin_->digital_write(false);
@@ -601,35 +585,30 @@ void Tab5Camera::setup() {
     this->pwdn_pin_->digital_write(false);
   }
   
-  // 2. Init capteur ov5647
   if (!this->init_sensor_()) {
     ESP_LOGE(TAG, "❌ Échec init capteur");
     this->mark_failed();
     return;
   }
   
-  // 3. Init LDO pour MIPI
   if (!this->init_ldo_()) {
     ESP_LOGE(TAG, "❌ Échec init LDO");
     this->mark_failed();
     return;
   }
   
-  // 4. Init CSI
   if (!this->init_csi_()) {
     ESP_LOGE(TAG, "❌ Échec init CSI");
     this->mark_failed();
     return;
   }
   
-  // 5. Init ISP
   if (!this->init_isp_()) {
     ESP_LOGE(TAG, "❌ Échec init ISP");
     this->mark_failed();
     return;
   }
   
-  // 6. Allouer le buffer
   if (!this->allocate_buffer_()) {
     ESP_LOGE(TAG, "❌ Échec allocation buffer");
     this->mark_failed();
@@ -637,7 +616,7 @@ void Tab5Camera::setup() {
   }
   
   this->initialized_ = true;
-  ESP_LOGI(TAG, "✅ Caméra prête");
+  ESP_LOGI(TAG, "✅ Caméra prête (50fps optimisé)");
   
 #else
   ESP_LOGE(TAG, "❌ ESP32-P4 requis");
@@ -650,7 +629,6 @@ void Tab5Camera::setup() {
 bool Tab5Camera::init_sensor_() {
   ESP_LOGI(TAG, "Init capteur ov5647");
   
-  // Configurer SCCB pour ov5647
   sccb_i2c_config_t sccb_config = {};
   sccb_config.device_address = this->sensor_address_;
   sccb_config.dev_addr_length = I2C_ADDR_BIT_LEN_7;
@@ -665,27 +643,23 @@ bool Tab5Camera::init_sensor_() {
     return false;
   }
   
-  ESP_LOGI(TAG, "✓ SCCB initialisé via ESPHome I2C");
+  ESP_LOGI(TAG, "✓ SCCB initialisé");
   
-  // NOUVEAU: Allouer priv pour stocker la résolution
   uint32_t *resolution_ptr = (uint32_t*)malloc(sizeof(uint32_t));
   if (!resolution_ptr) {
-    ESP_LOGE(TAG, "Erreur allocation mémoire pour résolution");
+    ESP_LOGE(TAG, "Erreur allocation mémoire");
     return false;
   }
   *resolution_ptr = (uint32_t)this->resolution_;
   
-  // Configurer le capteur
   esp_cam_sensor_config_t sensor_config = {};
   sensor_config.sccb_handle = sccb_handle;
   sensor_config.reset_pin = -1;
   sensor_config.pwdn_pin = -1;
   sensor_config.xclk_pin = -1;
-  //sensor_config.xclk_pin = (int8_t)this->external_clock_pin_;
   sensor_config.xclk_freq_hz = this->external_clock_frequency_;
   sensor_config.sensor_port = ESP_CAM_SENSOR_MIPI_CSI;
   
-  // Détecter et initialiser le capteur
   this->sensor_device_ = ov5647_detect(&sensor_config);
   
   if (this->sensor_device_ == nullptr) {
@@ -694,10 +668,17 @@ bool Tab5Camera::init_sensor_() {
     return false;
   }
   
-  // IMPORTANT: Stocker la résolution dans priv
+  // AJOUT : Init de base du capteur
+  if (ov5647_init_sensor(this->sensor_device_) != ESP_OK) {
+    ESP_LOGE(TAG, "Init sensor failed");
+    free(resolution_ptr);
+    free(this->sensor_device_);
+    this->sensor_device_ = nullptr;
+    return false;
+  }
+  
   this->sensor_device_->priv = resolution_ptr;
   
-  // Configurer le format avec la résolution
   if (ov5647_set_format(this->sensor_device_, NULL) != ESP_OK) {
     ESP_LOGE(TAG, "Failed to set format");
     free(resolution_ptr);
@@ -706,11 +687,11 @@ bool Tab5Camera::init_sensor_() {
     return false;
   }
   
-  // NOUVEAU: Appliquer flip/mirror si configuré
+  // CORRIGÉ : enable = 1 au lieu de 0
   if (this->flip_mirror_) {
-    int enable = 0;//int enable = 1;
-    esp_cam_sensor_ioctl(this->sensor_device_, 0x04000010, &enable); // VFlip
-    esp_cam_sensor_ioctl(this->sensor_device_, 0x04000011, &enable); // HMirror
+    int enable = 1;
+    esp_cam_sensor_ioctl(this->sensor_device_, 0x04000010, &enable);
+    esp_cam_sensor_ioctl(this->sensor_device_, 0x04000011, &enable);
     ESP_LOGI(TAG, "✓ Flip/Mirror activé");
   }
   
@@ -737,7 +718,7 @@ bool Tab5Camera::init_ldo_() {
 }
 
 bool Tab5Camera::init_csi_() {
-  ESP_LOGI(TAG, "Init MIPI-CSI");
+  ESP_LOGI(TAG, "Init MIPI-CSI (optimisé 50fps)");
   
   CameraResolutionInfo res = this->get_resolution_info_();
   
@@ -746,12 +727,17 @@ bool Tab5Camera::init_csi_() {
   csi_config.clk_src = MIPI_CSI_PHY_CLK_SRC_DEFAULT;
   csi_config.h_res = res.width;
   csi_config.v_res = res.height;
-  csi_config.lane_bit_rate_mbps = 400; //250
+  
+  // OPTIMISÉ : Lane bit rate augmenté pour 50fps
+  csi_config.lane_bit_rate_mbps = 400;  // Au lieu de 250
+  
   csi_config.input_data_color_type = CAM_CTLR_COLOR_RAW8;
   csi_config.output_data_color_type = CAM_CTLR_COLOR_RGB565;
   csi_config.data_lane_num = 2;
   csi_config.byte_swap_en = false;
-  csi_config.queue_items = 3;
+  
+  // OPTIMISÉ : Plus de buffers pour éviter les drops
+  csi_config.queue_items = 5;  // Au lieu de 3
   
   esp_err_t ret = esp_cam_new_csi_ctlr(&csi_config, &this->csi_handle_);
   if (ret != ESP_OK) {
@@ -759,7 +745,6 @@ bool Tab5Camera::init_csi_() {
     return false;
   }
   
-  // Callbacks
   esp_cam_ctlr_evt_cbs_t callbacks = {
     .on_get_new_trans = Tab5Camera::on_csi_new_frame_,
     .on_trans_finished = Tab5Camera::on_csi_frame_done_,
@@ -777,20 +762,17 @@ bool Tab5Camera::init_csi_() {
     return false;
   }
   
-  ESP_LOGI(TAG, "✓ CSI OK (%ux%u)", res.width, res.height);
+  ESP_LOGI(TAG, "✓ CSI OK (%ux%u @ 400Mbps/lane)", res.width, res.height);
   return true;
 }
 
 bool Tab5Camera::init_isp_() {
-  ESP_LOGI(TAG, "Initialisation ISP");
+  ESP_LOGI(TAG, "Init ISP (optimisé 50fps)");
   
   CameraResolutionInfo res = this->get_resolution_info_();
   
-  // Ajuster la fréquence ISP selon la résolution
-  uint32_t isp_clock_hz = 80000000;
-  if (this->resolution_ == RESOLUTION_SVGA) {
-    isp_clock_hz = 120000000;
-  }
+  // OPTIMISÉ : Clock ISP augmenté pour 50fps
+  uint32_t isp_clock_hz = 160000000;  // 160 MHz au lieu de 120 MHz
   
   esp_isp_processor_cfg_t isp_config = {};
   isp_config.clk_src = ISP_CLK_SRC_DEFAULT;
@@ -803,9 +785,8 @@ bool Tab5Camera::init_isp_() {
   isp_config.has_line_end_packet = false;
   isp_config.clk_hz = isp_clock_hz;
   
-  // Configuration du pattern Bayer
-  int bayer_pattern = 1;  // 0, 1, 2, 3
-  
+  // Essayez 0, puis 1, 2, 3 si couleurs incorrectes
+  int bayer_pattern = 0;
   isp_config.bayer_order = (color_raw_element_order_t)bayer_pattern;
   
   const char* bayer_names[] = {"RGGB", "GRBG", "GBRG", "BGGR"};
@@ -813,22 +794,20 @@ bool Tab5Camera::init_isp_() {
   
   esp_err_t ret = esp_isp_new_processor(&isp_config, &this->isp_handle_);
   if (ret != ESP_OK) {
-    ESP_LOGE(TAG, "Échec création ISP: 0x%x", ret);
+    ESP_LOGE(TAG, "ISP creation failed: 0x%x", ret);
     return false;
   }
   
   ret = esp_isp_enable(this->isp_handle_);
   if (ret != ESP_OK) {
-    ESP_LOGE(TAG, "Échec activation ISP: 0x%x", ret);
+    ESP_LOGE(TAG, "ISP enable failed: 0x%x", ret);
     esp_isp_del_processor(this->isp_handle_);
     this->isp_handle_ = nullptr;
     return false;
   }
   
-  ESP_LOGI(TAG, "✓ ISP initialisé (clock=%u MHz, bayer=%s)", 
-           isp_clock_hz / 1000000, bayer_names[bayer_pattern]);
+  ESP_LOGI(TAG, "✓ ISP OK (160 MHz, bayer=%s)", bayer_names[bayer_pattern]);
   
-  // Configurer les corrections couleur
   this->configure_isp_color_correction_();
   
   return true;
@@ -837,7 +816,6 @@ bool Tab5Camera::init_isp_() {
 void Tab5Camera::configure_isp_color_correction_() {
   ESP_LOGI(TAG, "Configuration corrections couleur");
   
-  // Corrections couleur de base si supportées
 #ifdef CONFIG_ISP_COLOR_ENABLED
   esp_isp_color_config_t color_config = {};
   color_config.color_contrast = {145, 145, 145};
@@ -851,29 +829,24 @@ void Tab5Camera::configure_isp_color_correction_() {
   }
 #endif
 
-  // Tentative d'activation AWB
   if (this->sensor_device_) {
     int awb_value = 1;
-    
-    // Utilisation de la valeur numérique pour AWB
     esp_err_t ret = esp_cam_sensor_ioctl(this->sensor_device_, 0x03010001, &awb_value);
     
     if (ret == ESP_OK) {
       ESP_LOGI(TAG, "✓ AWB activé");
     } else {
-      ESP_LOGW(TAG, "AWB non supporté (erreur: 0x%x), utilisation balance manuelle", ret);
+      ESP_LOGW(TAG, "AWB non supporté, balance manuelle");
       this->apply_manual_white_balance_();
     }
   }
 }
 
 void Tab5Camera::apply_manual_white_balance_() {
-  ESP_LOGI(TAG, "Application balance des blancs manuelle");
+  ESP_LOGI(TAG, "Application balance manuelle");
   
 #ifdef CONFIG_ISP_COLOR_ENABLED
   esp_isp_color_config_t color_config = {};
-  
-  // Réglages manuels pour compensation
   color_config.color_contrast = {145, 145, 145};
   color_config.color_saturation = {135, 135, 135};
   color_config.color_hue = 0;
@@ -882,21 +855,23 @@ void Tab5Camera::apply_manual_white_balance_() {
   esp_err_t ret = esp_isp_color_configure(this->isp_handle_, &color_config);
   if (ret == ESP_OK) {
     ESP_LOGI(TAG, "✓ Balance manuelle appliquée");
-  } else {
-    ESP_LOGW(TAG, "Configuration couleur non supportée");
   }
 #endif
 }
+
 bool Tab5Camera::allocate_buffer_() {
   CameraResolutionInfo res = this->get_resolution_info_();
   this->frame_buffer_size_ = res.width * res.height * 2;
   
+  // Allocation optimisée avec alignment
   this->frame_buffers_[0] = (uint8_t*)heap_caps_aligned_alloc(
-    64, this->frame_buffer_size_, MALLOC_CAP_SPIRAM
+    64, this->frame_buffer_size_, 
+    MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT
   );
   
   this->frame_buffers_[1] = (uint8_t*)heap_caps_aligned_alloc(
-    64, this->frame_buffer_size_, MALLOC_CAP_SPIRAM
+    64, this->frame_buffer_size_, 
+    MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT
   );
   
   if (!this->frame_buffers_[0] || !this->frame_buffers_[1]) {
@@ -906,7 +881,7 @@ bool Tab5Camera::allocate_buffer_() {
   
   this->current_frame_buffer_ = this->frame_buffers_[0];
   
-  ESP_LOGI(TAG, "✓ Buffers: 2x%u bytes", this->frame_buffer_size_);
+  ESP_LOGI(TAG, "✓ Buffers: 2x%u bytes (aligned 64)", this->frame_buffer_size_);
   return true;
 }
 
@@ -939,7 +914,6 @@ bool IRAM_ATTR Tab5Camera::on_csi_frame_done_(
 }
 
 CameraResolutionInfo Tab5Camera::get_resolution_info_() const {
-    
     return {800, 640};
 }
 
@@ -950,11 +924,16 @@ bool Tab5Camera::start_streaming() {
   
   ESP_LOGI(TAG, "Démarrage streaming");
   
-  // IMPORTANT: Vérifier la résolution configurée
   CameraResolutionInfo res = this->get_resolution_info_();
-  ESP_LOGI(TAG, "Résolution active: %ux%u", res.width, res.height);
+  ESP_LOGI(TAG, "Résolution: %ux%u @ 50fps", res.width, res.height);
   
-  // Démarrer le capteur
+  // Diagnostic : vérifier état du capteur
+  if (this->sensor_device_) {
+    uint8_t sleep_mode = 0;
+    ov5647_read(this->sensor_device_->sccb_handle, 0x0100, &sleep_mode);
+    ESP_LOGI(TAG, "Mode sleep avant: 0x%02X", sleep_mode);
+  }
+  
   if (this->sensor_device_) {
     int enable = 1;
     esp_err_t ret = esp_cam_sensor_ioctl(
@@ -967,11 +946,14 @@ bool Tab5Camera::start_streaming() {
       return false;
     }
     
-    // Délai pour que le capteur démarre complètement
     delay(100);
+    
+    // Vérifier démarrage
+    uint8_t sleep_mode_after = 0;
+    ov5647_read(this->sensor_device_->sccb_handle, 0x0100, &sleep_mode_after);
+    ESP_LOGI(TAG, "Mode sleep après: 0x%02X", sleep_mode_after);
   }
   
-  // Démarrer CSI
   esp_err_t ret = esp_cam_ctlr_start(this->csi_handle_);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "Start CSI failed: %d", ret);
@@ -979,7 +961,7 @@ bool Tab5Camera::start_streaming() {
   }
   
   this->streaming_ = true;
-  ESP_LOGI(TAG, "✅ Streaming actif (%ux%u)", res.width, res.height);
+  ESP_LOGI(TAG, "✅ Streaming actif (50fps optimisé)");
   return true;
 }
 
@@ -1002,15 +984,24 @@ bool Tab5Camera::stop_streaming() {
 
 bool Tab5Camera::capture_frame() {
   if (!this->streaming_) {
+    ESP_LOGW(TAG, "Pas de streaming actif");
     return false;
   }
   
   bool was_ready = this->frame_ready_;
+  
   if (was_ready) {
     this->frame_ready_ = false;
     
     uint8_t last_complete_buffer = (this->buffer_index_ + 1) % 2;
     this->current_frame_buffer_ = this->frame_buffers_[last_complete_buffer];
+    
+    // Diagnostic : vérifier contenu
+    uint32_t sum = 0;
+    for(int i = 0; i < 100; i++) {
+      sum += this->current_frame_buffer_[i];
+    }
+    ESP_LOGD(TAG, "✓ Frame capturée, checksum: %u", sum);
   }
   
   return was_ready;
@@ -1027,20 +1018,20 @@ uint16_t Tab5Camera::get_image_height() const {
 #endif  // USE_ESP32_VARIANT_ESP32P4
 
 void Tab5Camera::loop() {
-  // Tout est géré par les callbacks ISR
+  // Géré par callbacks ISR
 }
 
 void Tab5Camera::dump_config() {
   ESP_LOGCONFIG(TAG, "Tab5 Camera:");
   ESP_LOGCONFIG(TAG, "  Capteur: ov5647 @ 0x%02X", this->sensor_address_);
-  ESP_LOGCONFIG(TAG, "  Résolution: %ux%u", 
+  ESP_LOGCONFIG(TAG, "  Résolution: %ux%u @ 50fps", 
                 this->get_image_width(), this->get_image_height());
   ESP_LOGCONFIG(TAG, "  Format: RGB565");
+  ESP_LOGCONFIG(TAG, "  CSI: 400 Mbps/lane");
+  ESP_LOGCONFIG(TAG, "  ISP: 160 MHz");
   ESP_LOGCONFIG(TAG, "  Flip/Mirror: %s", this->flip_mirror_ ? "OUI" : "NON");
   ESP_LOGCONFIG(TAG, "  Streaming: %s", this->streaming_ ? "OUI" : "NON");
-  ESP_LOGCONFIG(TAG, "  Initialisé: %s", this->initialized_ ? "OUI" : "NON");
 }
 
 }  // namespace tab5_camera
 }  // namespace esphome
-
