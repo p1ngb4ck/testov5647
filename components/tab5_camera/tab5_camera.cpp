@@ -746,7 +746,7 @@ bool Tab5Camera::init_csi_() {
   csi_config.clk_src = MIPI_CSI_PHY_CLK_SRC_DEFAULT;
   csi_config.h_res = res.width;
   csi_config.v_res = res.height;
-  csi_config.lane_bit_rate_mbps = 250;
+  csi_config.lane_bit_rate_mbps = 400; //250
   csi_config.input_data_color_type = CAM_CTLR_COLOR_RAW8;
   csi_config.output_data_color_type = CAM_CTLR_COLOR_RGB565;
   csi_config.data_lane_num = 2;
