@@ -786,7 +786,7 @@ bool Tab5Camera::init_isp_() {
   isp_config.clk_hz = isp_clock_hz;
   
   // Essayez 0, puis 1, 2, 3 si couleurs incorrectes
-  int bayer_pattern = 0;
+  int bayer_pattern = 1;
   isp_config.bayer_order = (color_raw_element_order_t)bayer_pattern;
   
   const char* bayer_names[] = {"RGGB", "GRBG", "GBRG", "BGGR"};
