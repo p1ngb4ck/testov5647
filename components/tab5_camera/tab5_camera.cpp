@@ -1001,7 +1001,7 @@ bool Tab5Camera::capture_frame() {
     for(int i = 0; i < 100; i++) {
       sum += this->current_frame_buffer_[i];
     }
-    ESP_LOGD(TAG, "✓ Frame capturée, checksum: %u", sum);
+    ESP_LOGVV(TAG, "✓ Frame capturée, checksum: %u", sum);
   }
   
   return was_ready;
